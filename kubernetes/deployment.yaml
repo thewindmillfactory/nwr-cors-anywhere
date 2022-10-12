@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cors-anywhere
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: cors-anywhere
+  template:
+    metadata:
+      labels:
+        component: cors-anywhere
+    spec:
+      containers:
+        -
+          name: cors-anywhere
+          image: 'us.gcr.io/nwr-prod-env/cors-anywhere:latest'
+          ports:
+            -
+              name: cors-anywhere
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /iscorsneeded
+              port: cors-anywhere
+            initialDelaySeconds: 5
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /iscorsneeded
+              port: cors-anywhere
+            initialDelaySeconds: 15
+            timeoutSeconds: 20
+

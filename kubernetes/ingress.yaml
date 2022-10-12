@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: cors-anywhere
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: prod-cors-anywhere
+    networking.gke.io/managed-certificates: manifest-managedcertificate-cors-anywhere
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  backend:
+    serviceName: cors-anywhere
+    servicePort: 443

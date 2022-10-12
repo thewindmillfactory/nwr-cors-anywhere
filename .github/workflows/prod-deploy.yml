@@ -1,0 +1,137 @@
+# Build for development PRs
+
+name: Auto Deploy Cors-Anywhere K8s Prod cluster
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  setup-build:
+    name: Build and Deploy to K8s NWR Prod
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set current date and time as env variable
+      id: datetime
+      run: echo "::set-output name=datetime::$(date +'%Y-%m-%dT%H:%M:%S')"
+
+    - name: Get current Unix Timestamp
+      id: timestamp
+      run: echo "::set-output name=timestamp::$(date +%s)"
+
+    - name: Notify Slack about new Deployment started
+      run: |-
+        generate_slack_message()
+        {
+          cat <<EOF
+        {
+          "attachments": [
+            {
+              "color": "#0000CC",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":eyes: Repository: *${GITHUB_REPOSITORY}*. Run ID: *${GITHUB_RUN_ID}* \n
+        Target: *${GITHUB_REPOSITORY}-PROD*. :whale:
+        Commit: *${{ github.event.head_commit.message }}*
+        Deployment *Started!* (by *${GITHUB_ACTOR}*)"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        EOF
+        }
+
+#        curl -X POST -H "Content-type: application/json" --data "$(generate_slack_message)" "${{secrets.GLOBAL_SLACK_WEBHOOK}}"
+
+    - uses: google-github-actions/setup-gcloud@v0
+      with:
+        service_account_key: ${{ secrets.PROD_GCP_SVC_ACCT_KEY }}
+        project_id: nwr-prod-env
+
+    - run: gcloud --quiet auth configure-docker
+
+    - name: Set GCP Service Account
+      run: 'echo "$PROD_GCP_JS_ACCT_KEY" > certs/googleServiceAccountKey.json'
+      shell: bash
+      env:
+        PROD_GCP_JS_ACCT_KEY: ${{secrets.PROD_GCP_JS_ACCT_KEY}}
+
+
+    - name: Run Docker build and Push to GCP in NWR-Prod
+      run: |-
+        docker build -t us.gcr.io/nwr-prod-env/cors-anywhere:${{ steps.timestamp.outputs.timestamp }} .
+        docker push us.gcr.io/nwr-prod-env/cors-anywhere:${{ steps.timestamp.outputs.timestamp }}
+
+    - name: Capture Errors
+      if: always()
+      run:  |-
+        generate_slack_message_error()
+        {
+          cat <<EOF
+        {
+          "attachments": [
+            {
+              "color": "#CC0000",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":x: Repository: *${GITHUB_REPOSITORY}*. Run ID: *${GITHUB_RUN_ID}* \n
+        Target: *${GITHUB_REPOSITORY}-PROD*. :whale:
+        Commit: *${{ github.event.head_commit.message }}*
+        Deployment *ERROR!* (by *${GITHUB_ACTOR}*)
+        Error Link: https://github.com/thewindmillfactory/godel-backend/actions/runs/${GITHUB_RUN_ID}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        EOF
+        }
+
+        generate_slack_message()
+        {
+          cat <<EOF
+        {
+          "attachments": [
+            {
+              "color": "#80FF00",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: Repository: *${GITHUB_REPOSITORY}*. Run ID: *${GITHUB_RUN_ID}* \n
+        Target: *${GITHUB_REPOSITORY}-PROD*. :whale:
+        Commit: *${{ github.event.head_commit.message }}*
+        Deployment *Successfully Finished!* (by *${GITHUB_ACTOR}*)
+        Logs Link: https://github.com/thewindmillfactory/godel-backend/actions/runs/${GITHUB_RUN_ID}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        EOF
+        }
+
+#        strerror="failure"
+
+#        if [ "$status" == "$strerror" ]; then
+#          curl -X POST -H "Content-type: application/json" --data "$(generate_slack_message_error)" "${{secrets.GLOBAL_SLACK_WEBHOOK}}"
+#        else
+#          curl -X POST -H "Content-type: application/json" --data "$(generate_slack_message)" "${{secrets.GLOBAL_SLACK_WEBHOOK}}"
+#        fi
+
+#      env:
+#         status: ${{job.status}}
