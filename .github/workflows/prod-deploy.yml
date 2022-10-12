@@ -58,12 +58,6 @@ jobs:
 
     - run: gcloud --quiet auth configure-docker
 
-    - name: Set GCP Service Account
-      run: 'echo "$PROD_GCP_JS_ACCT_KEY" > certs/googleServiceAccountKey.json'
-      shell: bash
-      env:
-        PROD_GCP_JS_ACCT_KEY: ${{secrets.PROD_GCP_JS_ACCT_KEY}}
-
 
     - name: Run Docker build and Push to GCP in NWR-Prod
       run: |-
