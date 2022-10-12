@@ -12,12 +12,6 @@ WORKDIR /usr/src/app/
 
 COPY . .
 
-FROM node:12.15.0-alpine3.11
-
-RUN apk add bash
-COPY --from=stage1 /usr/src/app/ /usr/src/app/
-
-WORKDIR /usr/src/app/
 
 EXPOSE 8080
 
