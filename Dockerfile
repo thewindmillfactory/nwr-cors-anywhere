@@ -6,15 +6,13 @@ ENV PORT=$PORT
 ARG CORSANYWHERE_WHITELIST=https://now.urnowhere.com,https://3d.now.urnowhere.com,https://meta3d.dev.urnowhere.com,https://metamorphosis3d.qa.urnowhere.com
 ENV CORSANYWHERE_WHITELIST=$CORSANYWHERE_WHITELIST
 
-RUN npm install
 RUN mkdir -p /usr/src/app/
 WORKDIR /usr/src/app/
 
 COPY . .
 
+RUN npm install
 
 EXPOSE 8080
 
 CMD ["node", "server.js"]
-
-USER node
