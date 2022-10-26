@@ -15,7 +15,7 @@ spec:
       containers:
         -
           name: cors-anywhere
-          image: 'us.gcr.io/nwr-prod-env/cors-anywhere@sha256:80b33bbb6dca04d77bd6196b7068023d30ae6db3e1483d6f39eeb1845462cfe3'
+          image: 'us.gcr.io/nwr-prod-env/cors-anywhere@sha256:192f5132a38410d2f1a916a18ee61a474b4fb881b3ec13b511e873a692ac41a8'
           ports:
             -
               name: cors-anywhere
