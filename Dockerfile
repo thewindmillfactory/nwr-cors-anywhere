@@ -1,6 +1,6 @@
-FROM node:12.15.0-slim AS stage1
-#RUN apt-get update && apt-get install -y wget curl
-RUN apt-get install -y wget curl
+FROM node:slim AS stage1
+RUN apt-get update && apt-get install -y wget curl
+
 
 ARG PORT=8080
 ENV PORT=$PORT
