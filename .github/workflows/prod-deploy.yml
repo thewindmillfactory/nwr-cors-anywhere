@@ -51,7 +51,7 @@ jobs:
 
 #        curl -X POST -H "Content-type: application/json" --data "$(generate_slack_message)" "${{secrets.GLOBAL_SLACK_WEBHOOK}}"
 
-    - uses: google-github-actions/setup-gcloud@v1
+    - uses: google-github-actions/setup-gcloud@v0
       with:
         service_account_key: ${{ secrets.PROD_GCP_SVC_ACCT_KEY }}
         project_id: nwr-prod-env
